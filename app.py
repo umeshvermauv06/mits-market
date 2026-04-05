@@ -23,19 +23,18 @@ class Item(db.Model):
     desc = db.Column(db.Text, nullable=True)
     image_file = db.Column(db.String(100), nullable=True, default='default.jpg')
 
+# --- THE AUTO-FIX: Create tables before the first request ---
+with app.app_context():
+    db.create_all()
+
 # 3. ROUTES
 @app.route('/')
 def index():
-    # Get the category from the URL (e.g., /?category=Lost)
     cat = request.args.get('category')
-    
     if cat:
-        # If a category is selected, filter the database
         all_items = Item.query.filter_by(type=cat).all()
     else:
-        # Otherwise, show everything
         all_items = Item.query.all()
-        
     return render_template('index.html', items=all_items, current_cat=cat)
 
 @app.route('/add', methods=['GET', 'POST'])
@@ -73,6 +72,4 @@ def delete_item(item_id):
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
