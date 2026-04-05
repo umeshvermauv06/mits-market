@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Post New Item - MITS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="form-container">
+        <h2>Post a New Listing</h2>
+        <form action="/add" method="POST" enctype="multipart/form-data">
+            <label>Type:</label>
+            <select name="type">
+                <option value="Sell">Sell</option>
+                <option value="Lost">Lost</option>
+                <option value="Found">Found</option>
+            </select>
+
+            <label>Item Name:</label>
+            <input type="text" name="title" placeholder="e.g. Drafter, Calculator" required>
+
+            <label>Price (If Selling):</label>
+            <input type="text" name="price" placeholder="e.g. ₹500">
+
+            <label>Contact Number:</label>
+            <input type="text" name="contact" placeholder="Your WhatsApp/Mobile" required>
+
+            <label>Description:</label>
+            <textarea name="desc" rows="4" placeholder="Condition or where you lost/found it..."></textarea>
+
+            <label>Upload Photo:</label>
+            <input type="file" name="image" accept="image/*">
+
+            <button type="submit" class="btn">Post Now</button>
+            <a href="/" class="cancel-link">Back to Home</a>
+        </form>
+    </div>
+</body>
+</html>

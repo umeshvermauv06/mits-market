@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MITS Campus Market</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <h1>MITS Market & Help</h1>
+        <a href="{{ url_for('add_item') }}" class="btn">Post an Item +</a>
+    </nav>
+
+    <div class="filter-bar">
+        <a href="/" class="filter-btn {% if not current_cat %}active{% endif %}">All Items</a>
+        <a href="/?category=Sell" class="filter-btn {% if current_cat == 'Sell' %}active{% endif %}">For Sale</a>
+        <a href="/?category=Lost" class="filter-btn {% if current_cat == 'Lost' %}active{% endif %}">Lost</a>
+        <a href="/?category=Found" class="filter-btn {% if current_cat == 'Found' %}active{% endif %}">Found</a>
+    </div>
+
+    <div class="container">
+        {% if items|length == 0 %}
+            <p style="text-align: center; width: 100%; color: #666;">No items found in this category.</p>
+        {% endif %}
+
+        {% for item in items %}
+        <div class="card {{ item.type.lower() }}">
+            <img src="{{ url_for('static', filename='uploads/' + item.image_file) }}" alt="item" class="item-img">
+            
+            <span class="badge">{{ item.type }}</span>
+            <h3>{{ item.title }}</h3>
+            <p><strong>Price:</strong> {{ item.price }}</p>
+            <p>{{ item.desc }}</p>
+            <p class="contact">📞 {{ item.contact }}</p>
+            
+            <div class="card-footer">
+                <a href="{{ url_for('delete_item', item_id=item.id) }}" 
+                   class="delete-btn" 
+                   onclick="return confirm('Remove this post?')">
+                   Remove Post
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
