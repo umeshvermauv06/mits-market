@@ -22,8 +22,28 @@ class Item(db.Model):
     contact = db.Column(db.String(20), nullable=False)
     desc = db.Column(db.Text, nullable=True)
     image_file = db.Column(db.String(100), nullable=True, default='default.jpg')
+    # Student Info Fields
+    student_name = db.Column(db.String(100))
+    branch = db.Column(db.String(50))
+    semester = db.Column(db.String(10))
 
-# --- THE AUTO-FIX: Create tables before the first request ---
+# --- SMART DECODER ---
+def decode_mits_email(email):
+    # Example: 25ce1um76@mitsgwl.ac.in -> Extract 'ce'
+    username = email.split('@')[0]
+    dept_code = "".join([char for char in username if char.isalpha()]).lower()
+    
+    depts = {
+        'ce': 'Civil Engineering',
+        'me': 'Mechanical Engineering',
+        'cse': 'Computer Science',
+        'it': 'Information Technology',
+        'ee': 'Electrical Engineering',
+        'ec': 'Electronics',
+        'ai': 'AI & Data Science'
+    }
+    return depts.get(dept_code, "MITS Student")
+
 with app.app_context():
     db.create_all()
 
@@ -31,18 +51,25 @@ with app.app_context():
 @app.route('/')
 def index():
     cat = request.args.get('category')
-    if cat:
-        all_items = Item.query.filter_by(type=cat).all()
-    else:
-        all_items = Item.query.all()
+    all_items = Item.query.filter_by(type=cat).all() if cat else Item.query.all()
     return render_template('index.html', items=all_items, current_cat=cat)
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_item():
     if request.method == 'POST':
+        email = request.form.get('email').lower()
+        
+        # Verification
+        if not email.endswith('@mitsgwl.ac.in'):
+            return "<h1>Error: Use @mitsgwl.ac.in email only!</h1><a href='/add'>Back</a>"
+
+        # Auto-Detect Logic
+        detected_branch = decode_mits_email(email)
+        raw_name = email.split('@')[0]
+        clean_name = ''.join([i for i in raw_name if not i.isdigit()]).title()
+
         file = request.files.get('image')
         filename = 'default.jpg'
-        
         if file and file.filename != '':
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename))
@@ -53,7 +80,10 @@ def add_item():
             price=request.form.get('price') or "N/A",
             contact=request.form.get('contact'),
             desc=request.form.get('desc'),
-            image_file=filename
+            image_file=filename,
+            student_name=clean_name,
+            branch=detected_branch,
+            semester=request.form.get('semester')
         )
         db.session.add(new_entry)
         db.session.commit()

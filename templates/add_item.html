@@ -1,38 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Post New Item - MITS</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Item - MITS</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="form-container">
-        <h2>Post a New Listing</h2>
-        <form action="/add" method="POST" enctype="multipart/form-data">
-            <label>Type:</label>
-            <select name="type">
-                <option value="Sell">Sell</option>
-                <option value="Lost">Lost</option>
-                <option value="Found">Found</option>
+        <h2>Post New Item</h2>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="email" name="email" placeholder="College Email (25ce...) " required>
+            
+            <select name="semester" required>
+                <option value="" disabled selected>Your Semester</option>
+                <option value="1">1st Semester</option>
+                <option value="2">2nd Semester</option>
+                <option value="3">3rd Semester</option>
+                <option value="4">4th Semester</option>
             </select>
 
-            <label>Item Name:</label>
-            <input type="text" name="title" placeholder="e.g. Drafter, Calculator" required>
+            <select name="type" required>
+                <option value="Sell">Selling Something</option>
+                <option value="Lost">Lost Item</option>
+                <option value="Found">Found Item</option>
+            </select>
 
-            <label>Price (If Selling):</label>
-            <input type="text" name="price" placeholder="e.g. ₹500">
-
-            <label>Contact Number:</label>
-            <input type="text" name="contact" placeholder="Your WhatsApp/Mobile" required>
-
-            <label>Description:</label>
-            <textarea name="desc" rows="4" placeholder="Condition or where you lost/found it..."></textarea>
-
+            <input type="text" name="title" placeholder="What is it? (e.g. Drafter, Keys)" required>
+            <input type="text" name="price" placeholder="Price (or 'Free')">
+            <input type="text" name="contact" placeholder="WhatsApp Number" required>
+            <textarea name="desc" placeholder="Details (e.g. Near SH-1, Blue color)"></textarea>
+            
             <label>Upload Photo:</label>
-            <input type="file" name="image" accept="image/*">
-
-            <button type="submit" class="btn">Post Now</button>
-            <a href="/" class="cancel-link">Back to Home</a>
+            <input type="file" name="image">
+            
+            <button type="submit" class="btn">Post Instantly</button>
         </form>
+        <a href="/">← Back to Market</a>
     </div>
 </body>
 </html>
