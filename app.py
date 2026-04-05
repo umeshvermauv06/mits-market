@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 import os
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+app.secret_key = "mits_secret_key_2026" # This keeps the 'Gate Pass' secure
 
 # 1. CONFIGURATION
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -22,52 +23,50 @@ class Item(db.Model):
     contact = db.Column(db.String(20), nullable=False)
     desc = db.Column(db.Text, nullable=True)
     image_file = db.Column(db.String(100), nullable=True, default='default.jpg')
-    # Student Info Fields
     student_name = db.Column(db.String(100))
     branch = db.Column(db.String(50))
     semester = db.Column(db.String(10))
 
 # --- SMART DECODER ---
 def decode_mits_email(email):
-    # Example: 25ce1um76@mitsgwl.ac.in -> Extract 'ce'
     username = email.split('@')[0]
     dept_code = "".join([char for char in username if char.isalpha()]).lower()
-    
-    depts = {
-        'ce': 'Civil Engineering',
-        'me': 'Mechanical Engineering',
-        'cse': 'Computer Science',
-        'it': 'Information Technology',
-        'ee': 'Electrical Engineering',
-        'ec': 'Electronics',
-        'ai': 'AI & Data Science'
-    }
+    depts = {'ce': 'Civil', 'me': 'Mechanical', 'cse': 'CS', 'it': 'IT', 'ee': 'Electrical', 'ec': 'Electronics'}
     return depts.get(dept_code, "MITS Student")
 
 with app.app_context():
     db.create_all()
 
-# 3. ROUTES
+# 3. THE "GATEKEEPER" ROUTES
+@app.route('/verify', methods=['GET', 'POST'])
+def verify():
+    if request.method == 'POST':
+        email = request.form.get('email').lower()
+        if email.endswith('@mitsgwl.ac.in'):
+            # Set the Gate Pass (Session)
+            session['user_email'] = email
+            session['user_branch'] = decode_mits_email(email)
+            session['user_name'] = "".join([i for i in email.split('@')[0] if not i.isdigit()]).title()
+            return redirect(url_for('index'))
+        else:
+            return "<h1>Invalid Email! Use @mitsgwl.ac.in</h1><a href='/verify'>Try Again</a>"
+    return render_template('verify.html')
+
 @app.route('/')
 def index():
+    if 'user_email' not in session:
+        return redirect(url_for('verify'))
+    
     cat = request.args.get('category')
     all_items = Item.query.filter_by(type=cat).all() if cat else Item.query.all()
     return render_template('index.html', items=all_items, current_cat=cat)
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_item():
+    if 'user_email' not in session:
+        return redirect(url_for('verify'))
+
     if request.method == 'POST':
-        email = request.form.get('email').lower()
-        
-        # Verification
-        if not email.endswith('@mitsgwl.ac.in'):
-            return "<h1>Error: Use @mitsgwl.ac.in email only!</h1><a href='/add'>Back</a>"
-
-        # Auto-Detect Logic
-        detected_branch = decode_mits_email(email)
-        raw_name = email.split('@')[0]
-        clean_name = ''.join([i for i in raw_name if not i.isdigit()]).title()
-
         file = request.files.get('image')
         filename = 'default.jpg'
         if file and file.filename != '':
@@ -81,8 +80,8 @@ def add_item():
             contact=request.form.get('contact'),
             desc=request.form.get('desc'),
             image_file=filename,
-            student_name=clean_name,
-            branch=detected_branch,
+            student_name=session['user_name'], # Auto-filled from session
+            branch=session['user_branch'],     # Auto-filled from session
             semester=request.form.get('semester')
         )
         db.session.add(new_entry)
@@ -90,16 +89,10 @@ def add_item():
         return redirect(url_for('index'))
     return render_template('add_item.html')
 
-@app.route('/delete/<int:item_id>')
-def delete_item(item_id):
-    item_to_delete = Item.query.get_or_404(item_id)
-    if item_to_delete.image_file != 'default.jpg':
-        image_path = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], item_to_delete.image_file)
-        if os.path.exists(image_path):
-            os.remove(image_path)
-    db.session.delete(item_to_delete)
-    db.session.commit()
-    return redirect(url_for('index'))
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('verify'))
 
 if __name__ == '__main__':
     app.run(debug=True)

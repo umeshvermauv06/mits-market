@@ -8,9 +8,12 @@
 </head>
 <body>
     <nav>
-        <h1>MITS Market</h1>
-        <a href="{{ url_for('add_item') }}" class="btn">Post Item +</a>
-    </nav>
+    <h1>MITS Market</h1>
+    <div>
+        <a href="{{ url_for('add_item') }}" class="btn">Post +</a>
+        <a href="/logout" style="color: #e74c3c; margin-left: 15px; text-decoration: none; font-size: 0.9rem;">Exit</a>
+    </div>
+</nav>
 
     <div class="filter-bar">
         <a href="/" class="filter-btn {% if not current_cat %}active{% endif %}">All</a>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to MITS Market</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body style="background: #f0f2f5; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;">
+    <div style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 400px;">
+        <h1 style="color: #1a2a3a; margin-bottom: 10px;">MITS Campus Market</h1>
+        <p style="color: #666; margin-bottom: 30px;">Enter your college email to enter the marketplace.</p>
+        
+        <form action="/verify" method="POST">
+            <input type="email" name="email" placeholder="25ce1um76@mitsgwl.ac.in" 
+                   style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;" required>
+            <button type="submit" class="btn" style="width: 100%; cursor: pointer;">Enter Marketplace</button>
+        </form>
+        
+        <p style="font-size: 0.8rem; color: #999; margin-top: 20px;">Secure Access for MITS Students Only</p>
+    </div>
+</body>
+</html>
